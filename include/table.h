@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include <iostream>
 #include <vector>
+#include <iterator>
+#include <list>
+const size_t P = 99971;
 typedef unsigned int key_type;
 
 template<class T>
@@ -18,7 +21,7 @@ class TableInterface {
 public:
 	virtual bool insert(key_type k, const T& elem) = 0;
 	virtual bool erase(key_type k) = 0;
-	virtual int find_key(key_type k) = 0;
+	//virtual int find_key(key_type k) = 0;
 	virtual Pair<T> find(key_type k) = 0;
 	virtual size_t GetSize() = 0;
 	virtual bool IsEmpty() = 0;
@@ -58,7 +61,7 @@ public:
 		size = t.size;
 	}
 
-	int find_key(key_type k) override {
+	int find_key(key_type k){
 		if (size == 0) return -1;
 		for (size_t i = 0; i < size; i++)
 			if (storage[i].key == k) return i;
@@ -106,7 +109,7 @@ public:
 		this->size = t.size;
 	}
 
-	int find_key(key_type k) override {
+	int find_key(key_type k){
 		if (size == 0) return -1;
 		int mid;
  		int st = 0, fn = size - 1, s = -1;
@@ -165,5 +168,76 @@ public:
 		if (index == -1) throw "The element with this key does not exist";
 		else
 			return storage[index];
+	}
+};
+
+template<class T>
+class HashTable: public TableInterface<T> {
+private:
+	size_t HashFunc(size_t x) {
+		return(((a * x + b) % P) % max_size);
+	}
+public:
+	std::vector<std::list<Pair<T>>> storage;
+	size_t size,max_size;
+	size_t a, b;
+	HashTable(int n) {
+		a = rand() % P;
+		b = rand() % P;
+		size = 0;
+		max_size = n*n;
+		storage.resize(max_size);
+	}
+	HashTable(HashTable& ht) {
+		storage = ht.storage;
+		size = ht.size;
+		max_size = ht.max_size;
+		a = ht.a;
+		b = ht.b;
+	}
+	bool insert(key_type k, const T& elem) override{
+		size_t i = HashFunc(k);
+		for (auto it = storage[i].begin(); it != storage[i].end(); ++it)
+			if (it->key == k) throw "The element with this key already exists";
+		storage[i].push_back(Pair<T>(k, elem));
+		size++;
+		return 1;
+	}
+
+	bool erase(key_type k) override {
+		size_t i = HashFunc(k);
+		int f = 0;
+		for (auto it = storage[i].begin(); it != storage[i].end(); ++it) {
+			if (it->key == k) { 
+				storage[i].erase(it);
+				size--;
+				f = 1;
+				break;
+			}
+		}
+		if (f==0) throw "The element with this key does not exists";
+		return 1;
+	}
+
+	Pair<T> find(key_type k) override{
+		size_t i = HashFunc(k);
+		int f = 0;
+		for (auto it = storage[i].begin(); it != storage[i].end(); ++it) {
+			if (it->key == k)
+				f = 1;
+				return Pair<T>(k, it->data);
+		}
+		if (f==0) throw "The element with this key does not exists";
+	}
+
+	size_t GetSize()  override {
+		return size;
+	}
+	bool IsEmpty() override {
+		return (size == 0);
+	}
+	void clear() override {
+		storage.clear();
+		size = 0;
 	}
 };

@@ -126,6 +126,60 @@ TEST(SortedTable, can_clear_sorted_table) {
 	ASSERT_EQ(0, t.GetSize());
 }
 
+TEST(HashTable, can_insert_element) {
+	HashTable<int> t(1);
+	ASSERT_NO_THROW(t.insert(0, 1));
+}
+
+TEST(HashTable, cant_insert_existing_element) {
+	HashTable<int> t(2);
+	t.insert(0, 1);
+	ASSERT_ANY_THROW(t.insert(0, 2));
+}
+
+TEST(HashTable, insert_change_size) {
+	HashTable<int> t(1);
+	t.insert(0, 1);
+	ASSERT_EQ(1, t.GetSize());
+}
+
+TEST(HashTable, empty_table) {
+	HashTable<int> t(1);
+	ASSERT_EQ(1, t.IsEmpty());
+}
+
+TEST(HashTable, can_erase_element) {
+	HashTable<int> t(1);
+	t.insert(0, 1);
+	ASSERT_NO_THROW(t.erase(0));
+}
+
+TEST(HashTable, cant_erase_element_from_empty_table) {
+	HashTable<int> t(1);
+	ASSERT_ANY_THROW(t.erase(5));
+}
+
+TEST(HashTable, cant_erase_non_existent_element) {
+	HashTable<int> t(1);
+	t.insert(0, 1);
+	ASSERT_ANY_THROW(t.erase(5));
+}
+
+TEST(HashTable, erase_change_size) {
+	HashTable<int> t(1);
+	t.insert(0, 1);
+	t.erase(0);
+	ASSERT_EQ(0, t.GetSize());
+}
+
+TEST(HashTable, can_clear) {
+	HashTable<int> t(1);
+	t.insert(0, 1);
+	ASSERT_NO_THROW(t.clear());
+
+}
+
+
 
 
  
